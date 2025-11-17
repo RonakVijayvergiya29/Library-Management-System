@@ -12,7 +12,6 @@ using std::cout;
 using std::cin;
 using std::endl;
 
-// Custom exceptions
 class BookNotFoundException : public std::exception {
 public:
     const char* what() const noexcept override {
@@ -29,67 +28,61 @@ public:
     }
 };
 
-// Topic 1: Classes, Objects, and Access Specifiers
-// Base class LibraryItem with protected members and public functions.
-// Topic 3: Inheritance, Polymorphism, and Function Overriding - LibraryItem is abstract with a pure virtual function.
 class LibraryItem {
 protected:
     string title;
     int itemID;
 public:
-    // Inline getter (Topic 2: inline function)
+
     inline int getItemID() const { return itemID; }
 
     LibraryItem(const string& t = "", int id = 0) : title(t), itemID(id) {
-        // Constructor
+    
     }
 
-    // Copy constructor (demonstrates initializer list)
+
     LibraryItem(const LibraryItem& other) : title(other.title), itemID(other.itemID) {}
 
-    // Virtual destructor for proper cleanup in polymorphic use (Topic 2: destructor)
+    
     virtual ~LibraryItem() {}
 
     void setTitle(const string& t) {
-        // Use of this pointer (Topic 2)
+        
         this->title = t;
     }
 
     string getTitle() const { return title; }
 
-    // Pure virtual function -> makes LibraryItem abstract (Topic 3)
+    
     virtual double calculateFine(int daysOverdue) const = 0;
 
-    // For file serialization
+    
     virtual string serialize() const = 0;
     virtual string getType() const = 0;
 };
 
-// Topic 3 continued: Derived classes Book and Journal
+
 class Book : public LibraryItem {
 private:
     string author;
     int pages;
 public:
-    // Constructor with initializer list (Topic 2)
+
     Book(const string& t = "", int id = 0, const string& a = "", int p = 0)
         : LibraryItem(t, id), author(a), pages(p) {}
 
-    // Copy constructor (Topic 2)
+    
     Book(const Book& other)
         : LibraryItem(other), author(other.author), pages(other.pages) {}
 
-    // Destructor (Topic 2)
     ~Book() override {}
 
     double calculateFine(int daysOverdue) const override {
-        // Topic 3: function overriding
-        // Simple fine: $0.50 per day for books
+    
         return daysOverdue * 0.50;
     }
 
-    // Operator Overloading (Topic 4)
-    // Compare two books by itemID
+
     bool operator==(const Book& rhs) const {
         return this->itemID == rhs.itemID;
     }
@@ -120,7 +113,7 @@ public:
     ~Journal() override {}
 
     double calculateFine(int daysOverdue) const override {
-        // Journals may have higher fine: $1.00 per day
+    
         return daysOverdue * 1.00;
     }
 
@@ -133,10 +126,8 @@ public:
     string getType() const override { return "JOURNAL"; }
 };
 
-// Global catalog: demonstrate a dynamic container of pointers (Topic 1 & 2)
 vector<LibraryItem*> catalog;
 
-// Topic 2: Dynamic Memory Allocation functions (use new/delete)
 LibraryItem* createBook(const string& title, int id, const string& author, int pages) {
     return new Book(title, id, author, pages);
 }
@@ -144,13 +135,11 @@ LibraryItem* createBook(const string& title, int id, const string& author, int p
 LibraryItem* createJournal(const string& title, int id, int volume, int issue) {
     return new Journal(title, id, volume, issue);
 }
-
-// Topic 2: Function overloading (search by ID or by title)
 LibraryItem* search(int id) {
     for (LibraryItem* item : catalog) {
         if (item->getItemID() == id) return item;
     }
-    // If not found, throw (Topic 6: exception handling)
+    
     throw BookNotFoundException();
 }
 
@@ -161,7 +150,7 @@ LibraryItem* search(const string& title) {
     throw BookNotFoundException();
 }
 
-// File handling (Topic 6): save and load catalog
+
 void saveCatalog(const string& filename) {
     std::ofstream ofs(filename, std::ios::out);
     if (!ofs) {
@@ -176,7 +165,7 @@ void saveCatalog(const string& filename) {
 void loadCatalog(const string& filename) {
     std::ifstream ifs(filename, std::ios::in);
     if (!ifs) {
-        // If file doesn't exist, that's okay — nothing to load
+        
         return;
     }
     string line;
@@ -209,18 +198,18 @@ void loadCatalog(const string& filename) {
     ifs.close();
 }
 
-// Utility to print a single item (demonstrating polymorphism in output)
+
 void printItem(const LibraryItem* item) {
     cout << "[" << item->getType() << "] ID: " << item->getItemID()
          << " Title: \"" << item->getTitle() << "\"\n";
 }
 
-// Demo main demonstrating all topics sequentially with comments
+
 int main() {
     const string catalogFile = "catalog.txt";
 
     try {
-        // Topic 6: File Handling - load existing catalog from file
+        
         cout << "Loading catalog from file (" << catalogFile << ") if it exists...\n";
         loadCatalog(catalogFile);
         cout << "Loaded " << catalog.size() << " items from file.\n\n";
@@ -241,7 +230,7 @@ int main() {
 
         try {
             if (choice == 1) {
-                // Add Book
+                
                 string title, author;
                 int id, pages;
                 cout << "Enter book title: ";
@@ -256,7 +245,7 @@ int main() {
                 catalog.push_back(createBook(title, id, author, pages));
                 cout << "Book added successfully!\n\n";
             } else if (choice == 2) {
-                // Add Journal
+                
                 string title;
                 int id, volume, issue;
                 cout << "Enter journal title: ";
@@ -271,7 +260,7 @@ int main() {
                 catalog.push_back(createJournal(title, id, volume, issue));
                 cout << "Journal added successfully!\n\n";
             } else if (choice == 3) {
-                // Search by ID
+                
                 int id;
                 cout << "Enter item ID to search: ";
                 cin >> id;
@@ -280,7 +269,7 @@ int main() {
                 cout << "Fine for 5 days overdue: $" << std::fixed << std::setprecision(2)
                      << item->calculateFine(5) << "\n\n";
             } else if (choice == 4) {
-                // Search by Title
+                
                 string title;
                 cout << "Enter title to search: ";
                 cin.ignore();
@@ -301,11 +290,12 @@ int main() {
         }
     }
 
-    // Free allocated memory (Topic 2: memory management)
+
     for (LibraryItem* item : catalog) {
         delete item;
     }
     catalog.clear();
 
     return 0;
+
 }
